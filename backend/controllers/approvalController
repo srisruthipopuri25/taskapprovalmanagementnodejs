@@ -1,0 +1,44 @@
+const Approval = require("../models/Approval");
+const Task = require("../models/Task");
+
+exports.approveTask = async (req, res) => {
+
+  try {
+
+    const { taskId, status } = req.body;
+
+    const approval = await Approval.create({
+      task: taskId,
+      approvedBy: req.user.id,
+      status
+    });
+
+    await Task.findByIdAndUpdate(taskId, { status });
+
+    res.json(approval);
+
+  } catch (error) {
+
+    res.status(500).json({ message: error.message });
+
+  }
+
+};
+
+exports.getApprovals = async (req, res) => {
+
+  try {
+
+    const approvals = await Approval.find()
+      .populate("task")
+      .populate("approvedBy");
+
+    res.json(approvals);
+
+  } catch (error) {
+
+    res.status(500).json({ message: error.message });
+
+  }
+
+};
